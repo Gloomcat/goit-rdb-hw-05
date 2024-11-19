@@ -1,0 +1,32 @@
+USE mydb;
+
+SELECT *, (SELECT customer_id FROM orders WHERE id = od.order_id) AS customer_id
+FROM order_details od;
+
+SELECT * FROM order_details od
+WHERE od.order_id IN (SELECT id FROM orders WHERE shipper_id = 3);
+
+SELECT order_id, AVG(quantity) AS average_quantity FROM (SELECT * FROM order_details WHERE quantity > 10) as temp_table
+GROUP BY order_id;
+
+WITH temp_table AS (
+    SELECT * FROM order_details WHERE quantity > 10
+)
+SELECT order_id, AVG(quantity) AS average_quantity
+FROM temp_table
+GROUP BY order_id;
+
+DROP FUNCTION IF EXISTS DivideBy;
+
+DELIMITER //
+CREATE FUNCTION DivideBy(a FLOAT, b FLOAT)
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+    DECLARE result FLOAT;
+    SET result = a / b;
+    RETURN result;
+END //
+DELIMITER ;
+
+SELECT quantity, DivideBy(quantity, 2) as half_quantity FROM order_details;
